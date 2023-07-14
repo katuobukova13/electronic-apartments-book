@@ -15,7 +15,7 @@ class EntranceFactory extends Factory
     {
         return [
             'house_id' => House::all()->random()->id,
-            'total_floors' => fake()->numberBetween(1, 10),
+            'total_floors' => fake()->numberBetween(1, 5),
         ];
     }
 }

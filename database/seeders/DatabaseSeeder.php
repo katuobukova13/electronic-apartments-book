@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
 
        Entrance::factory(5)->create();
 
-       Floor::factory(5)->create();
-
+        $this->call([
+            FloorSeeder::class,
+        ]);
     }
 }
