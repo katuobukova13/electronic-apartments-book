@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -22,9 +21,13 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
+Route::get('/houses', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth'])->name('dashboard');
+
+Route::get('/houses/{id}', function ($id) {
+    return Inertia::render('HouseDetails', ['id' => $id]);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
