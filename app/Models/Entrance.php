@@ -2,30 +2,16 @@
 
 namespace  App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Entrance extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'total_floors',
-    ];
+    use HasFactory;
 
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = [
-        'id',
-        'house_id',
-        'created_at',
-        'updated_at',
-        ];
+    protected $fillable = ['total_floors', 'house_id'];
 
     public function house()
     {
