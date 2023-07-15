@@ -8,7 +8,12 @@ use Illuminate\Http\Request;
 class HouseBuilderController extends Controller
 {
     public function store(Request $request) {
-        $house = HouseBuilderFactory::create($request['state'], $request['total_floors'], $request['total_apartments']);
+        $house = HouseBuilderFactory::create(
+            $request->state,
+            $request->entrances,
+            $request->total_floors,
+            $request->total_apartments
+        );
         $house->save();
     }
 }

@@ -7,16 +7,17 @@ use App\Models\House;
 
 class HouseBuilderFactory
 {
-    public static function create($state, $total_floors, $total_apartments): House
+    public static function create($state, $entrances, $total_floors, $total_apartments): House
     {
         $builder = new HouseBuilder();
 
         $builder->setHouseState($state);
 
-        $entrance = $builder->setEntrance($total_floors);
-
-        for ($i = 0; $i < $entrance->total_floors; $i++) {
-            $builder->setFloor($entrance, $total_apartments);
+       for ($entrance_index = 0; $entrance_index < $entrances; $entrance_index++) {
+            $entrance = $builder->setEntrance($total_floors);
+            for ($floor_index = 0; $floor_index < $total_floors; $floor_index++) {
+                $builder->setFloor($entrance, $total_apartments);
+            }
         }
 
         return $builder->buildHouse();
