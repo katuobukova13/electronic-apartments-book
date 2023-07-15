@@ -16,10 +16,10 @@ class HouseBuilderFactory
        for ($entrance_index = 0; $entrance_index < $entrances; $entrance_index++) {
             $entrance = $builder->setEntrance($total_floors);
             for ($floor_index = 0; $floor_index < $total_floors; $floor_index++) {
-                $builder->setFloor($entrance, $total_apartments);
+                $builder->setFloor($total_apartments, $entrance);
             }
         }
 
-        return $builder->buildHouse();
+        return $builder->build();
     }
 }

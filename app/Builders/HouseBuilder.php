@@ -30,14 +30,14 @@ class HouseBuilder implements HouseBuilderInterface {
         return $entrance;
     }
 
-    public function setFloor(Entrance $entrance, $total_apartments): HouseBuilderInterface
+    public function setFloor($total_apartments, Entrance $entrance = null): HouseBuilderInterface
     {
         $floor = new Floor(['total_apartments' => $total_apartments]);
         $entrance->floors()->save($floor);
         return $this;
     }
 
-    public function buildHouse(): House
+    public function build(): House
     {
         return $this->house;
     }
