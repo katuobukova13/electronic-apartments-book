@@ -15,7 +15,9 @@ class HouseBuilderFactory
 
         $entrance = $builder->setEntrance($total_floors);
 
-        $builder->setFloor($entrance, $total_apartments);
+        for ($i = 0; $i < $entrance->total_floors; $i++) {
+            $builder->setFloor($entrance, $total_apartments);
+        }
 
         return $builder->buildHouse();
     }

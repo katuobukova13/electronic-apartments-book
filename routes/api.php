@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HouseBuilderController;
 use App\Http\Controllers\HouseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,3 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::apiResource('houses', HouseController::class);
+
+Route::post('house', [HouseBuilderController::class, 'store']);
