@@ -1,6 +1,6 @@
 init:
-	npm install
 	composer install
+	npm install
 
 env:
 	cp .env.example .env
@@ -12,6 +12,7 @@ migrate:
 	./vendor/bin/sail exec laravel.test php artisan migrate --seed
 
 start:
+	npm run build
 	npm run dev
 
 down:
