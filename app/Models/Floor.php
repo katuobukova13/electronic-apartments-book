@@ -15,6 +15,7 @@ class Floor extends Model
      */
     protected $fillable = [
         'total_apartments',
+        'entrance_id',
         ];
 
     /**

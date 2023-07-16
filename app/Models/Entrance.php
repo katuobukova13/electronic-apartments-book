@@ -1,6 +1,6 @@
 <?php
 
-namespace  App\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,14 +11,14 @@ class Entrance extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['total_floors', 'house_id'];
+    protected $fillable = ['total_floors'];
 
-    public function house()
+    public function house(): BelongsTo
     {
         return $this->belongsTo(House::class);
     }
 
-    public function floors()
+    public function floors(): HasMany
     {
         return $this->hasMany(Floor::class);
     }

@@ -7,16 +7,29 @@ use Illuminate\Http\Request;
 
 class EntranceController extends Controller
 {
-    public function store(Request $request)
+    public function show(int $id, int $entrance_id)
     {
-        Entrance::create($request['total_floors'], $request['house_id']);
+        $entrance = Entrance::find($entrance_id);
+
+        if ($entrance) {
+            return $entrance->load(['floors']);
+        } else {
+            return response()->json(['error' => 'Entrance not found'], 404);
+        }
+    }
+
+    public function store(Request $request): \Illuminate\Http\JsonResponse
+    {
+        Entrance::create([
+            'total_floors' => $request['total_floors'],
+            'house_id' => $request['house_id']]);
 
         return response()->json(['message' => 'Entrance created successfully'], 201);
     }
 
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id, int $entrance_id)
     {
-        $entrance = Entrance::find($id);
+        $entrance = Entrance::find($entrance_id);
 
         if ($entrance) {
             $entrance->update([
@@ -30,9 +43,9 @@ class EntranceController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy($id, $entrance_id): \Illuminate\Http\JsonResponse
     {
-        $entrance = Entrance::find($id);
+        $entrance = Entrance::find($entrance_id);
 
         if ($entrance) {
             $entrance->delete();

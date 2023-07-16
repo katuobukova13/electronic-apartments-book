@@ -7,16 +7,31 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import Modal from "@/Components/Modal.jsx";
 import {Inertia} from '@inertiajs/inertia';
 import SecondaryButton from "@/Components/SecondaryButton.jsx";
+import {InertiaLink} from "@inertiajs/inertia-react";
 
 function HouseDetails({auth, id}) {
     const [house, setHouse] = useState(null);
     const [confirmingHouseDeletion, setConfirmingHouseDeletion] = useState(false);
+    const [updatingHouse, setUpdatingHouse] = useState(false);
+    const [addingEntrance, setAddingEntrance] = useState(false);
 
     const {
+        data,
+        setData,
+        errors,
+        post: store,
+        put: update,
         delete: destroy,
         processing,
         reset,
-    } = useForm();
+    } = useForm({
+        state: '',
+        entrances: '',
+        total_floors: '',
+        total_apartments: '',
+        entranceFloors: '',
+        entranceApartments: '',
+    });
 
     const confirmHouseDeletion = () => {
         setConfirmingHouseDeletion(true);
@@ -26,16 +41,25 @@ function HouseDetails({auth, id}) {
         axios.get(`/api/houses/${id}`)
             .then(response => {
                 setHouse(response.data);
+                setData('state', response.data.state);
+                setData('entrances', response.data.entrances.map(entrance => ({
+                    id: entrance.id,
+                    floors: entrance.total_floors
+                })));
             })
             .catch(error => {
                 console.error('There was an error!', error);
             });
     }, [id]);
 
-    const handleUpdate = () => {
-        axios.put(`/api/houses/${id}`)
+    const HandleUpdateState = (event) => {
+        event.preventDefault();
+        axios.put(`/api/houses/${id}`, {
+            state: data.state,
+        })
             .then(response => {
                 setHouse(response.data);
+                setUpdatingHouse(false);
             })
             .catch(error => {
                 console.error('There was an error!', error);
@@ -53,8 +77,25 @@ function HouseDetails({auth, id}) {
             });
     }
 
+    const handleAddEntrance = (event) => {
+        event.preventDefault();
+        axios.post(`/api/houses/${id}/entrance`, {
+            id: id,
+            total_floors: data.entranceFloors,
+            total_apartments: data.entranceApartments,
+        })
+            .then(response => {
+                Inertia.visit(`/houses/` + id); // Refresh the page after adding the entrance
+            })
+            .catch(error => {
+                console.error('There was an error!', error);
+            });
+    }
+
     const closeModal = () => {
         setConfirmingHouseDeletion(false);
+        setUpdatingHouse(false);
+        setAddingEntrance(false);
 
         reset();
     };
@@ -62,7 +103,7 @@ function HouseDetails({auth, id}) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">House info</h2>}
         >
             <Head title={`House`}/>
             <div className="py-12">
@@ -75,24 +116,98 @@ function HouseDetails({auth, id}) {
                                         <h2 className="mb-4 font-semibold">House {house.id}</h2>
                                         <p className="mb-4 font-medium">State: {house.state}</p>
                                     </div>
-                                    <div>
-                                        {house.entrances && house.entrances.map(entrance => (
-                                            <div key={entrance.id}>
-                                                <h5 className="mb-4 text-gray-600">Entrance ID: {entrance.id}</h5>
-                                                <p className="my-2 text-gray-400">Number of
-                                                    floors: {entrance.total_floors}</p>
-                                                {entrance.floors.map(floor => (
-                                                    <div key={floor.id} className="my-2">
-                                                        <h5>Floor {floor.id}</h5>
-                                                        <p>Number of apartments: {floor.total_apartments}</p>
-                                                    </div>
+                                    {house.entrances.length ? (
+                                            <table className="table-auto w-full">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">Entrance ID</th>
+                                                    <th scope="col">Floor IDS</th>
+                                                    <th scope="col">Number of apartments</th>
+                                                    <th scope="col">Actions</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {house.entrances && house.entrances.map(entrance => (
+                                                    <tr key={house.id}>
+                                                        <td className="border px-4 py-2">{entrance.id}</td>
+                                                        <td className="border px-4 py-2">
+                                                            {entrance.floors.map(floor => (
+                                                                <p>{floor.id}</p>
+                                                            ))}
+                                                        </td>
+                                                        <td className="border px-4 py-2">
+                                                            {entrance.floors.map(floor => (
+                                                                <p>{floor.total_apartments}</p>
+                                                            ))}
+                                                        </td>
+                                                        <td className="px-4 py-2">
+                                                            <InertiaLink
+                                                                href={`/houses/${house.id}/entrances/${entrance.id}`}>
+                                                                <PrimaryButton>Update info</PrimaryButton>
+                                                            </InertiaLink>
+                                                        </td>
+                                                    </tr>
                                                 ))}
-                                            </div>
-                                        ))}
-                                        <PrimaryButton onClick={() => setShowModal(true)}>Update</PrimaryButton>
-                                        <DangerButton onClick={confirmHouseDeletion}
-                                                      className='ml-3'>Delete</DangerButton>
+                                                </tbody>
+                                            </table>
+                                        ) :
+                                        <div>No entrances</div>
+                                    }
+                                    <div className="mt-6 flex justify-center">
+                                        <SecondaryButton className='mr-3' onClick={() => setAddingEntrance(true)}>Add
+                                            entrance</SecondaryButton>
+                                        <PrimaryButton onClick={() => setUpdatingHouse(true)}>Update house
+                                            state</PrimaryButton>
+                                        <DangerButton onClick={confirmHouseDeletion} className='ml-3'>Delete
+                                            house</DangerButton>
                                     </div>
+                                    <Modal show={updatingHouse} onClose={closeModal}>
+                                        <form onSubmit={HandleUpdateState} className="p-6">
+                                            <h2 className="text-lg font-medium text-gray-900">
+                                                Update House State
+                                            </h2>
+                                            <div className="mt-6 flex flex-col">
+                                                <label className="block mb-2 text-sm font-medium text-gray-900 pb-3">
+                                                    State:
+                                                    <select value={data.state}
+                                                            className="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                            onChange={e => setData('state', e.target.value)}>
+                                                        <option value="design">Design</option>
+                                                        <option value="construction">Construction</option>
+                                                    </select>
+                                                </label>
+                                            </div>
+                                            <div className="mt-6 flex justify-end">
+                                                <SecondaryButton onClick={closeModal}>Cancel</SecondaryButton>
+                                                <PrimaryButton className="ml-3">Update House</PrimaryButton>
+                                            </div>
+                                        </form>
+                                    </Modal>
+                                    <Modal show={addingEntrance} onClose={closeModal}>
+                                        <form onSubmit={handleAddEntrance} className="p-6">
+                                            <h2 className="text-lg font-medium text-gray-900">
+                                                Add Entrance
+                                            </h2>
+                                            <div className="mt-6 flex flex-col">
+                                                <label className="block mb-2 text-sm font-medium text-gray-900 pb-3">
+                                                    Number of floors:
+                                                    <input type="number" value={data.entranceFloors}
+                                                           onChange={e => setData('entranceFloors', e.target.value)}
+                                                           className="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+                                                </label>
+                                                <label className="block mb-2 text-sm font-medium text-gray-900 pb-3">
+                                                    Number of apartments:
+                                                    <input type="number" value={data.entranceApartments}
+                                                           onChange={e => setData('entranceApartments', e.target.value)}
+                                                           className="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+                                                </label>
+                                            </div>
+                                            <div className="mt-6 flex justify-end">
+                                                <SecondaryButton onClick={closeModal}>Cancel</SecondaryButton>
+                                                <PrimaryButton className="ml-3">Add Entrance</PrimaryButton>
+                                            </div>
+                                        </form>
+                                    </Modal>
                                     <Modal show={confirmingHouseDeletion} onClose={closeModal}>
                                         <form onSubmit={handleDelete} className="p-6">
                                             <h2 className="text-lg font-medium text-gray-900">

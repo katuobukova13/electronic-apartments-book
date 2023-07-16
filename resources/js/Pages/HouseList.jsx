@@ -10,19 +10,20 @@ function HouseList() {
         axios.get('/api/houses')
             .then(response => {
                 setHouses(response.data);
-                console.log(response.data)
             })
             .catch(error => {
                 console.error('There was an error!', error);
             });
     }, []);
+
     const countFloors = (entrances) => {
         let total = 0;
         entrances.forEach(entrance => {
-            total += entrance.floors.length;
+            total += entrance.total_floors;
         });
         return total;
     };
+
     const countApartments = (entrances) => {
         let total = 0;
         entrances.forEach(entrance => {
@@ -43,7 +44,7 @@ function HouseList() {
                     <th scope="col">Entrance</th>
                     <th scope="col">Floor</th>
                     <th scope="col">Apartments</th>
-                    <th scope={"col"}></th>
+                    <th scope="col"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -55,7 +56,7 @@ function HouseList() {
                         <td className="border px-4 py-2">{countFloors(house.entrances)}</td>
                         <td className="border px-4 py-2">{countApartments(house.entrances)}</td>
                         <td className="px-4 py-2">
-                            <InertiaLink href={`/houses/${house.id}`} >
+                            <InertiaLink href={`/houses/${house.id}`}>
                                 <SecondaryButton>View details</SecondaryButton>
                             </InertiaLink>
                         </td>

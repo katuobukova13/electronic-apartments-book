@@ -25,8 +25,17 @@ Route::get('/houses', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth'])->name('dashboard');
 
-Route::get('/houses/{id}', function ($id) {
-    return Inertia::render('HouseDetails', ['id' => $id]);
+Route::prefix('/houses')->group(function () {
+    Route::get('/{id}', function ($id) {
+        return Inertia::render('HouseDetails', ['id' => $id]);
+    });
+
+    Route::prefix('/{id_house}/entrances')->group(function () {
+        Route::get('/{id}', function ($house_id, $id) {
+            return Inertia::render('EntranceDetails',
+                ['house_id' => $house_id, 'id' => $id]);
+        });
+    });
 });
 
 Route::middleware('auth')->group(function () {
@@ -35,4 +44,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
